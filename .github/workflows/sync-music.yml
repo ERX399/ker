@@ -1,38 +1,34 @@
 name: Music Auto Sync
 
-# 触发条件：
-# 1. 推送到 main 分支（新增/删除音乐文件时）
-# 2. 定时触发：每天 UTC 0:00 和 12:00
 on:
   push:
     branches: [main]
     paths:
       - '音乐/**'
-schedule:
-- cron: '0 4 * * *' # UTC 4:00 (UTC+8 12:00)
-- cron: '0 10 * * *' # UTC 10:00 (UTC+8 18:00)
-- cron: '0 18 * * *' # UTC 18:00 (UTC+8 次日 00:00)
-- cron: '0 22 * * *' # UTC 22:00 (UTC+8 次日 06:00)
-  workflow_dispatch:       # 手动触发
+  schedule:
+    - cron: '0 4 * * *'
+    - cron: '0 10 * * *'
+    - cron: '0 18 * * *'
+    - cron: '0 22 * * *'
+  workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-      
+
       - name: 设置 Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: 运行同步脚本
         run: python sync_music.py
-      
+
       - name: 提交并推送变更
         run: |
           git config user.name "github-actions[bot]"
