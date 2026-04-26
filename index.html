@@ -1,117 +1,0 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KER éŸ³ä¹æµ‹è¯•</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            background: #0f0f0f;
-            color: #eee;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            padding: 20px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        h1 { font-size: 1.5em; margin-bottom: 16px; }
-        .status { padding: 12px; border-radius: 8px; margin-bottom: 16px; background: #1a1a1a; }
-        .song-list { display: flex; flex-direction: column; gap: 8px; }
-        .song-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px; background: #1a1a1a; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .song-item:hover { background: #2a2a2a; }
-        .song-item.playing { background: #1e3a1e; border: 1px solid #3a3; }
-        .song-num { color: #888; min-width: 24px; }
-        .song-name { flex: 1; }
-        .play-icon { color: #3a3; }
-        .error { color: #f55; }
-        .controls { margin-top: 16px; display: flex; gap: 8px; }
-        button {
-            padding: 8px 16px; border: none; border-radius: 6px;
-            background: #2a2a2a; color: #eee; cursor: pointer;
-        }
-        button:hover { background: #3a3a3a; }
-        button.active { background: #3a3; color: #000; }
-        audio { width: 100%; margin-top: 12px; }
-    </style>
-</head>
-<body>
-    <h1>ðŸŽ¥ KER éŸ³ä¹æµ‹è¯•é¡µ</h1>
-    <div class="status" id="status">â³ æ­£åœ¨åŠ è½½ music.js...</div>
-    <div class="song-list" id="songList"></div>
-    <audio id="audio" controls style="margin-top:16px;"></audio>
-    <div class="controls">
-        <button onclick="prev()">â® ä¸Šä¸€é©¦</button>
-        <button onclick="togglePlay()" id="btnPlay">â–¶ æ’­æ”¾</button>
-        <button onclick="next()">â¯ ä¸‹ä¸€é¦–</button>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/gh/ERX399/ker@main/music.js"></script>
-    <script>
-        const status = document.getElementById('status');
-        const songList = document.getElementById('songList');
-        const audio = document.getElementById('audio');
-        const btnPlay = document.getElementById('btnPlay');
-        let currentIndex = -1;
-        let songs = [];
-
-        function init() {
-            if (typeof KER_MUSIC === 'undefined') {
-                status.innerHTML = 'âŒ <span class="error">music.js åŠ è½½å¤±è´¥ï¼æ— æ³•èŽ·å–æ­Œæ›²åˆ—è¡¨ã€‚</span>';
-                return;
-            }
-            songs = KER_MUSIC.songs || [];
-            if (songs.length === 0) {
-                status.innerHTML = 'âš€ï¸ æ­Œæ›²åˆ—è¡¨ä¸ºç©ºï¼Œè¯·æ£€æŸ¥å£³ä¹æ–‡ä»¶æ˜¯å¦å·²éƒ¨ç½²ã€‚';
-                return;
-            }
-            status.innerHTML = `ç„¡æˆåŠŸåŠ è½½ ${songs.length} é¦–æ­Œæ›²`ì‚ˆ™[™\”ÛÛ™Ó\Ý
-
-NÂˆB‚ˆ[˜Ý[Ûˆ™[™\”ÛÛ™Ó\Ý
-
-HÂˆÛÛ™Ó\Ýš[›™\’SH	ÉÎÂˆÛÛ™ÜË™›Ü‘XXÚ
-
-ÛÛ™ËJHOˆÂˆÛÛœÝ]ˆHØÝ[Y[˜Ü™X]Q[[Y[
-	Ù]‰ÊNÂˆ]‹˜Û\ÜÓ˜[YHH	ÜÛÛ™ËZ][IÎÂˆ]‹š[›™\’SHÜ[ˆÛ\ÜÏHœÛÛ™Ë[[H‰ÚH
-È_OÜÜ[Ü[ˆÛ\ÜÏHœÛÛ™Ë[˜[YH‰ÜÛÛ™Ë›˜[Y_OÜÜ[Ü[ˆÛ\ÜÏHœ^KZXÛÛˆ¸¥­ÜÜ[˜Âˆ]‹›Û˜ÛXÚÈH
-
-HOˆ^R[™^
-JNÂˆÛÛ™Ó\Ý˜\[™Ú[
-]ŠNÂˆJNÂˆB‚ˆ[˜Ý[Ûˆ^R[™^
-JHÂˆYˆ
-HHHÛÛ™ÜË›[™Ý
-H™]\›ŽÂˆÝ\œ™[[™^HNÂˆÛÛœÝÛÛ™ÈHÛÛ™ÜÖÚWNÂˆ]Y[ËœÜ˜ÈHÛÛ™Ë\›Âˆ]Y[Ëœ^J
-K˜Ø]Ú
-HOˆÂˆÝ]\Ëš[›™\’SH8§cÜ[ˆÛ\ÜÏH™\œ›Üˆ¹¤«y¥/¹i,z-){ï&‰ÜÛÛ™Ë›˜[Y_H8 %	ÙK›Y\ÜØYÙ_OÜÜ[˜ÂˆJNÂˆ\]URJ
-NÂˆB‚ˆ[˜Ý[Ûˆ™[™\”ÛÛ™Ó\Ý
-
-HÂˆÛÛ™Ó\Ýš[›™\’SH	ÉÎÂˆB‚ˆ[˜Ý[Ûˆ\]URJ
-HÂˆØÝ[Y[œ]Y\žTÙ[XÝÜ[
-	ËœÛÛ™ËZ][IÊK™›Ü‘XXÚ
-
-[JHOˆÂˆ[˜Û\ÜÓ\ÝÙÙÛJ	Ü^Z[™ÉËHOOHÝ\œ™[[™^
-NÂˆJNÂˆ”^K^ÛÛ[H]Y[Ëœ]\ÙYÈ	ø¥­ˆ9¤«y¥/‰Èˆ	ø£î9¦ ¹æ­Œ';
-        }
-
-        function togglePlay() {
-            if (currentIndex === -1) { playIndex(0); return; }
-            if (audio.paused) audio.play(); else audio.pause();
-            updateUI();
-        }
-
-        function next() { playIndex((currentIndex + 1) % songs.length); }
-        function prev() { playIndex((currentIndex - 1 + songs.length) % songs.length); }
-
-        audio.addEventListener('play', updateUI);
-        audio.addEventListener('pause', updateUI);
-        audio.addEventListener('error', () => {
-            status.innerHTML = `âŒ <span class="error">éŸ³é¢‘åŠ è½½å¤±è´¥ï¼Œè¯·æ£€æŸ¥éŸ³ä¹æ–‡ä»¶æ˜¯å¦å¯è®¿é—®ðŸ‘Ž</span>`;
-        });
-
-        init();
-    </script>
-</body>
-</html>
